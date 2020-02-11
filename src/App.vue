@@ -1,32 +1,24 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+    <ul class="flex">
+      <li class="mr-3">
+        <a class="inline-block border border-blue-500 rounded py-1 px-3 bg-blue-500 text-white">
+          <router-link to="/">Home</router-link>
+        </a>
+      </li>
+      <li>
+        <a class="inline-block border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-1 px-3">
+          <router-link to="/videos">Videos</router-link>
+        </a>
+      </li>
+    </ul>
+    <div class="container mx-auto">
+      <router-view/>
     </div>
-    <router-view/>
   </div>
 </template>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
 
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
 </style>
+
