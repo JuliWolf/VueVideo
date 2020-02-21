@@ -4,9 +4,9 @@
             <app-video-template :video="item"></app-video-template>
         </div>
         <div class="mx-10 flex content-center">
-            <img class="h-10 inline self-center" src="@/assets/like.png" alt="Like">
+            <img class="h-10 inline self-center" src="@/assets/like.png" alt="Like" @click="likePost(item.id)">
             <p class="mx-3 text-sm text-gray-600 self-center">
-                Like
+                <strong>{{ item.likes ? item.likes : ""}}</strong> Like
             </p>
         </div>
 
@@ -14,12 +14,18 @@
 </template>
 
 <script>
+    import { mapActions } from 'vuex'
     import videoTemplate from '@/components/video/VideoTemplate'
 
     export default {
         props: ['item'],
         components: {
             appVideoTemplate: videoTemplate
+        },
+        methods: {
+            ...mapActions([
+                'likePost'
+            ])
         }
     }
 </script>
