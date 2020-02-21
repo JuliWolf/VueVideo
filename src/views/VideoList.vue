@@ -1,36 +1,38 @@
 <template>
-    <div class="grid grid-cols-1 gap-6">
-      <div v-for="item in getVideoData" class="m-6">
-        <app-video-template :item="item" :key="item.id"></app-video-template>
-      </div>
+    <div class="grid grid-cols-1 gap-6 border border-black-500 py-4">
+        <div v-for="item in getVideoData" class="mx-auto">
+            <app-card-template :item="item" :key="item.id"></app-card-template>
+        </div>
+        <div class="mx-auto">
+            <app-pagination></app-pagination>
+        </div>
     </div>
 </template>
 
 <script>
-  import videoTemplate from '@/components/video/videoTemplate';
-  import { mapActions, mapGetters } from 'vuex'
+    import cardTemplate from '@/components/video/cardTemplate';
+    import pagination from '@/components/Pagination';
+    import { mapActions, mapGetters } from 'vuex'
 
-  export default {
-    computed: {
-      ...mapGetters([
-        'getVideoData'
-      ])
-    },
-    methods: {
-      ...mapActions([
-        'updateVideoData'
-      ])
-    },
-    components: {
-      'appVideoTemplate': videoTemplate
-    },
-    beforeMount() {
-      this.updateVideoData()
+    export default {
+        computed: {
+            ...mapGetters([
+                'getVideoData'
+            ])
+        },
+        methods: {
+            ...mapActions([
+                'uploadData'
+            ])
+        },
+        components: {
+            'appCardTemplate': cardTemplate,
+            'appPagination': pagination
+        },
+        beforeMount() {
+            this.uploadData()
+        }
+
     }
-
-  }
 </script>
 
-<style>
-
-</style>
