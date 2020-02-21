@@ -4,9 +4,9 @@
             <app-video-template :video="item"></app-video-template>
         </div>
         <div class="mx-10 flex content-center">
-            <img class="h-10 inline self-center" src="@/assets/like.png" alt="Like" @click="likePost(item.id)">
+            <img class="h-10 inline self-center" src="@/assets/like.png" alt="Like" @click="addLike(item.id)">
             <p class="mx-3 text-sm text-gray-600 self-center">
-                <strong>{{ item.likes ? item.likes : ""}}</strong> Like
+                <strong>{{ likes }}</strong> Like
             </p>
         </div>
 
@@ -14,17 +14,36 @@
 </template>
 
 <script>
-    import { mapActions } from 'vuex'
+    import { mapActions, mapGetters } from 'vuex'
     import videoTemplate from '@/components/video/VideoTemplate'
 
     export default {
         props: ['item'],
+        data() {
+            return{
+                likes: this.item.likes ? this.item.likes : ""
+            }
+        },
         components: {
             appVideoTemplate: videoTemplate
         },
         methods: {
             ...mapActions([
-                'likePost'
+                'likePost',
+                'updateClientsLikes'
+            ]),
+            addLike(id){
+                if(this.getClientLikes < this.getMaxLikesPerPerson){
+                    this.likePost(id);
+                    this.likes ? this.likes++ : this.likes = 1;
+                    this.updateClientsLikes();
+                }
+            }
+        },
+        computed: {
+            ...mapGetters([
+                'getMaxLikesPerPerson',
+                'getClientLikes'
             ])
         }
     }

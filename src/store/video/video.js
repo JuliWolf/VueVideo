@@ -8,7 +8,8 @@ const state = {
     pageNumber: 0,
     pageCount: 1,
     clientPreferableVideoId: [],
-    maxLikesPerPerson: 50
+    maxLikesPerPerson: 50,
+    clientLikes: VueLocalStorage.get('likesAmount') ? VueLocalStorage.get('likesAmount')*1 : 0
 };
 
 const mutations = {
@@ -37,11 +38,16 @@ const mutations = {
         for(var i = state.clientPreferableVideoId.length, length = 0; i > length; i-- ){
             let index = state.videoData.findIndex((el) => { return el.id == state.clientPreferableVideoId[i-1]});
             if( state.videoData[index]['likes'] !== undefined){
-                state.videoData[index]['likes']++;
+                state.videoData[index].likes++;
             }else{
-                state.videoData[index]['likes'] = 1;
+                state.videoData[index].likes = 1;
             }
         }
+    },
+    FILTER_DATA (state){
+        state.videoData.sort((prev, next) => {
+            return (next.likes || 0) - (prev.likes || 0)
+        });
     },
     UPDATE_LIKES (state, id) {
         let index = state.videosPerPage.findIndex((el) => { return el.id == id});
@@ -58,29 +64,42 @@ const mutations = {
         VueLocalStorage.set('likes', state.clientPreferableVideoId);
         let likesAmount = VueLocalStorage.get('likesAmount');
         VueLocalStorage.set('likesAmount', likesAmount = likesAmount*1 + 1);
+    },
+    UPDATE_CLIENTS_LIKES_AMOUNT (state){
+        state.clientLikes++;
     }
 
 };
 
 const actions = {
-    uploadData ( {commit, dispatch } ) {
-        dispatch('updateVideoData').then(res => {
-            if(VueLocalStorage.get('likes')){
-                commit('UPDATE_LIKES_DATA');
-                dispatch('pageCount');
-            }else{
-                dispatch('pageCount');
-            }
-        })
-        .then(res => {
-            dispatch('getDataForPage');
-        })
+    async uploadData ( {commit, dispatch } ) {
+        await dispatch('updateVideoData');
+        if(VueLocalStorage.get('likes')){
+            await dispatch('updateLikesData');
+            await dispatch('filterDataByLikes');
+            await dispatch('pageCount');
+        }else{
+            await dispatch('pageCount');
+        }
+        await dispatch('getDataForPage');
     },
     updateVideoData ( { commit, dispatch} ){
         return new Promise((resolve, reject) => {
             commit('UPDATE_VIDEO_DATA');
             resolve();
         });
+    },
+    updateLikesData ( {commit}) {
+        return new Promise((resolve, reject) => {
+            commit('UPDATE_LIKES_DATA');
+            resolve();
+        })
+    },
+    filterDataByLikes( { commit }){
+        return new Promise((resolve, reject) => {
+            commit('FILTER_DATA');
+            resolve();
+        })
     },
     pageCount ({ commit }) {
         return new Promise((resolve, reject) => {
@@ -93,10 +112,9 @@ const actions = {
             commit('UPDATE_DATA_PER_PAGE')
         })
     },
-    getNextPageData ({ commit, dispatch }) {
-        dispatch('getNextPage').then(() => {
-            dispatch('getDataForPage')
-        })
+    async getNextPageData ({ commit, dispatch }) {
+        await dispatch('getNextPage');
+        await dispatch('getDataForPage');
     },
     getNextPage ({ commit }) {
         return new Promise((resolve, reject) => {
@@ -104,10 +122,10 @@ const actions = {
             resolve()
         })
     },
-    getPrevPageData ({ commit, dispatch }) {
-        dispatch('getPrevPage').then(() => {
-            dispatch('getDataForPage')
-        })
+    async getPrevPageData ({ commit, dispatch }) {
+        await dispatch('getPrevPage');
+        await dispatch('getDataForPage');
+
     },
     getPrevPage ({ commit }) {
         return new Promise((resolve, reject) => {
@@ -115,12 +133,10 @@ const actions = {
             resolve()
         })
     },
-    likePost ({ commit, dispatch }, data) {
-        dispatch('updateFavouriteList', data).then(res => {
-            dispatch('updateLocalStorage').then(res => {
-                commit('UPDATE_LIKES', data);
-            })
-        })
+    async likePost ({ commit, dispatch }, data) {
+        await dispatch('updateFavouriteList', data);
+        await dispatch('updateLocalStorage');
+        await commit('UPDATE_LIKES', data);
     },
     updateFavouriteList ( { commit }, id){
         return new Promise((resolve, reject) => {
@@ -133,11 +149,14 @@ const actions = {
             commit('UPDATE_LOCAL_STORAGE_LIKES');
             resolve()
         });
+    },
+    updateClientsLikes( {commit} ){
+        commit('UPDATE_CLIENTS_LIKES_AMOUNT')
     }
 };
 
 const getters = {
-    getVideoData(state){
+    getVideoData: state => {
         return state.videosPerPage;
     },
     pageNumber: state => {
@@ -145,6 +164,12 @@ const getters = {
     },
     pageCount: state => {
         return state.pageCount
+    },
+    getMaxLikesPerPerson: state => {
+       return state.maxLikesPerPerson;
+    },
+    getClientLikes: state => {
+        return state.clientLikes;
     }
 };
 
